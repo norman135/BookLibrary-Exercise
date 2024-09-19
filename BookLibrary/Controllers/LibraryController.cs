@@ -1,6 +1,8 @@
 ﻿using BookLibrary.Contexts;
+using BookLibrary.DTOs;
 using BookLibrary.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 namespace BookLibrary.Controllers
 {
     [Route("api/[controller]")]
@@ -9,15 +11,18 @@ namespace BookLibrary.Controllers
     {
         private readonly BooklibraryContext _context;
 
-        public LibraryController()
+        public LibraryController(BooklibraryContext context)
         {
-            _context = new BooklibraryContext();
+            _context = context;
         }
 
         [HttpGet]
         public ActionResult GetBooks()
         {
-            return Ok(_context.Books.ToList());
+
+            var books = _context.Books.Include(b => b.Author).Select(book => new BookDTO(book, book.Author));
+
+            return Ok(books);
         }
 
         [HttpPost]
